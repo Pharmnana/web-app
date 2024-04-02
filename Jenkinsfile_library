@@ -1,0 +1,58 @@
+@Library('Jenkins_lib1')
+@Library('Jenkins_lib2') _
+pipeline {
+  agent any
+  tools {
+    maven 'maven3.9.6'
+  }
+  environment {
+    GIT_REPO_URL = 'https://github.com/Pharmnana/web-app.git'
+  }
+  stages{
+    stage('Clone from Github'){
+      steps{
+        git "${GIT_REPO_URL}"
+      }
+    }
+    stage('Building with Maven'){
+      steps{
+        lib1('Build')
+      }
+    }
+    stage('Testing with SonarQube'){
+      steps{
+        lib2('Test')
+      }
+    }
+    stage('Deploying to Nexus'){
+      steps{
+        lib1('Deploy')
+      }
+    }
+    stage('Sending Approval Request to Team Lead'){
+      steps{
+        lib2('Approval')
+    }
+}
+    stage('Deploying to Tomcat'){
+      steps{
+        script {
+          echo "input Staging or Production below"
+          lib2('Staging')
+          }
+          }
+        }
+      }
+  
+  post {
+    always {
+      echo "I am done"
+    }
+    success {
+        lib2('Success')
+    }
+    failure {
+        lib2('Failure')
+  }
+}
+}
